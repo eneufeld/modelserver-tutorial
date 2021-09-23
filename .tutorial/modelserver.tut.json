@@ -1,0 +1,176 @@
+{
+	"title": "ModelServer Getting Started",
+	"description": "Example on creating a model server",
+	"tutorialFolder": "modelserver-example",
+	"exercises": [
+		{
+			"title": "Introduction and prerequisites",
+			"description": "Getting started and links to tutorials which are a prerequisite for this one",
+			"content": [
+				{
+					"html": "<p>EMF.cloud provides multiple components as well as examples.<br/> The components provide common functionality to support and ease the development of modeling tools in the web.<br/>The examples on the other hand show possibilities of combining all the different technologies to a modeling tool.</p>"
+				},
+				{
+					"image": {
+						"src": "https://www.eclipse.org/emfcloud/images/coffeeeditordemo.gif",
+						"description": "Coffee Editor",
+						"width": "80%"
+					}
+				},
+				{
+					"html": "<p>Before we start with the development you must have an understanding of <a href='https://www.eclipse.org/modeling/emf/' target='_blank'>EMF</a>.<br/>You can find a tutorial here: <a href='https://eclipsesource.com/blogs/tutorials/emf-tutorial/' target='_blank'>EMF Tutorial</a>.</p>"
+				}
+			]
+		},
+		{
+			"title": "EMF Model",
+			"description": "The EMF Model that we will use to create our modeling tool",
+			"content": [
+				{
+					"html": "<p>Before we begin the adaptation of all the components, we need to create our model.</p>"
+				},
+				{
+					"html": "<p>This tutorial uses a very simple task example. The example consists of:<ul><li>a TaskManager with a list of persons and a list of tasks</li><li>a person with a name and tasks</li><li>a task with a name and an assignee</li></ul>All children should be contained.</p>"
+				},
+				{
+					"image": {
+						"src": "https://raw.githubusercontent.com/eclipsesource/glsp-tutorial/main/./tutorial/images/model.jpg",
+						"description": "Example Model",
+						"width": "80%"
+					}
+				},
+				{
+					"html": "<p>Use Eclipse to create the model.</p>"
+				}
+			],
+			"solve": [
+				{
+					"terminalCommands": [
+						"cp -R .tutorial/solution/com.eclipsesource.example.model my-modeling-tool/backend/"
+					]
+				}
+			]
+		},
+		{
+			"title": "Target File",
+			"description": "Setup initial target plaform",
+			"content": [
+				{
+					"html": "<p>Before we can start the development we should prepare our target platorm.</p>"
+				},
+				{
+					"html": "<p>Initially we should add ecore and eclipse runtime.</p>"
+				},
+				{
+					"hint": {
+						"text": "Need help?",
+						"content": [
+							{
+								"html": "<p>Create a new General project and name it 'target'.</p>"
+							},
+							{
+								"html": "<p>Add a 'Target Definition' File. Name it 'example.target'.</p>"
+							},
+							{
+								"html": "<p>Add a new update site: 'https://download.eclipse.org/eclipse/updates/4.20/'. Select the 'Eclipse Platform SDK' feature.</p>"
+							},
+							{
+								"html": "<p>Add a new update site: 'https://download.eclipse.org/releases/2021-06'. Select the 'EMF - Eclipse Modeling Framework SDK' feature.</p>"
+							}
+						]
+					}
+				}
+			],
+			"solve": [
+				{
+					"terminalCommands": [
+						"mkdir -p my-modeling-tool/backend/target && cp -R .tutorial/solution/target-initial/* my-modeling-tool/backend/target"
+					]
+				}
+			]
+		},
+		{
+			"title": "Model Server",
+			"description": "Create a basic model server",
+			"content": [
+				{
+					"html": "<p>After the model was created and the target plaform prepared, we can prepare the modelserver.</p>"
+				},
+				{
+					"html": "<p>We will extend the modelserver in future steps. This step is just about the initial setup.</p>"
+				},
+				{
+					"html": "<p>First we need to add new dependencies to the target platform.</p>"
+				},
+				{
+					"html": "<p>So please add: <ul><li><a href='https://download.eclipse.org/emfcloud/modelserver/p2/nightly/'>https://download.eclipse.org/emfcloud/modelserver/p2/nightly/</a> and add <code>ModelSerer SDK</code></li><li><a href='https: //download.eclipse.org/tools/orbit/downloads/drops/R20210602031627/repository/'>https://download.eclipse.org/tools/orbit/downloads/drops/R20210602031627/repository/</a></li> and add <code>Google Guice (No AOP)</code>, <code>Google Guice Multibinding</code></ul></p>"
+				},
+				{
+					"html": "<p>Now we can start the development of the modelserver.</p>"
+				},
+				{
+					"html": "<p>We start by creating a new Plugin-Project and name it <code>com.eclipsesource.example.modelserver</code>. We also set the flag to create a rich client application.</p>"
+				},
+				{
+					"image": {
+						"src": "https://raw.githubusercontent.com/eclipsesource/glsp-tutorial/main/./tutorial/images/NewModelServer.jpg",
+						"description": "Model Server Plugin-Project Setup",
+						"width": "80%"
+					}
+				},
+				{
+					"html": "<p>Select the <code>Headless Hello RCP</code> template.</p>"
+				},
+				{
+					"html": "<p>First we need to define a <code>EPackageConfiguration</code>. For this we add <ul><li><code>com.eclipsesource.example.model</code></li></ul> as a dependency. We then create a new File <code>ExampleModelEPackageConfiguration</code> and implement the three necessary methods.</p>"
+				},
+				{
+					"html": "<p>The <code>getId</code> method need to return the nsURi, thus it is implemented as <code>return ModelPackage.eINSTANCE.getNsURI();</code>.</p>"
+				},
+				{
+					"html": "<p>The <code>getFileExtensions</code> method need to return the supported file extensions. Our model has the extension <code>model</code> and we also want to support <code>json</code> thus the method looks like this: <code>return Arrays.asList(\"model\",\"json\");</code>.</p>"
+				},
+				{
+					"html": "<p>The <code>registerEPackage</code> method need to actually register the package, thus it is implemented as <code>ModelPackage.eINSTANCE.eClass();</code>.</p>"
+				},
+				{
+					"html": "<p>Next we need to create a new <code>ModelServerModule</code>. For this we add <ul><li><code>com.google.inject</code></li><li><code>org.eclipse.emfcloud.modelserver.common</code></li><li><code>org.eclipse.emfcloud.modelserver.emf</code></li></ul> as dependencies to the <code>MANIFEST.MF</code>. To reduce the amount of boiler plate code we can extend the <code>DefaultModelServerModule</code>. We will name our new class: <code>ExampleModelServerModule</code>.</p>"
+				},
+				{
+					"html": "<p>This class needs to override one method: <code>configureEPackages</code>. This method needs to call <code>super</code> and also add the <code>EPackageConfiguration</code> we just created. The method code needs to look like this:</br> <code>super.configureEPackages(binding);</br>binding.add(ExampleModelEPackageConfiguration.class);</code></p>"
+				},
+				{
+					"html": "<p>Finally we need to adapt the <code>ModelServerApplication</code> that was generated. Here we remove the console log and use the <code>ModelServerLauncher</code> to start the ModelServer instead. The code looks like this: </br><code>final ModelServerLauncher launcher = new ModelServerLauncher(new ExampleModelServerModule());</br>launcher.run();</code></p>"
+				},
+				{
+					"html": "<p>Now nearly everything is ready to test the modelserver. Unfortunately we need to add some dependencies to our target platform: <ul><li>Orbit<ul><li>Google Guava (27.1.0)</li><li>Apache Jakarta log4j Plug-in (1.2.15)</li><li>SLF4J API Module (1.7.30)</li><li>SLF4J Simple Binding (1.7.30)</li><li>Servlet API Bundle</li><li>Guava: Google Core Libraries (27.1.0)</li><li>SLF4J Log4j12 Binding</li><li>jackson-annotations</li><li>jackson-core</li><li>jackson-databind</li></ul></li><li><a href=' https://download.eclipse.org/emfcloud/emfjson-jackson/p2/nightly/'> https://download.eclipse.org/emfcloud/emfjson-jackson/p2/nightly/</a></br>All emfjson bundles</li><li><a href='https://download.eclipse.org/releases/2021-06'>https://download.eclipse.org/releases/2021-06</a><ul><li>EMF Model Transaction SDK</li><li>EMF Validation Framework SDK</li></ul><li><a href='http://download.eclipse.org/jetty/updates/jetty-bundles-9.x'>http://download.eclipse.org/jetty/updates/jetty-bundles-9.x</a></br>All Bundles</li></ul></p> "
+				},
+				{
+					"html": "<p>Furthermore it is recommended to create a product. And resolve all dependencies there.</p>"
+				},
+				{
+					"html": "<p>We also need to create an instance to test the modelserver, thus create a dynamic instance from the ecore editor. Then move it to a new folder. I named my file <code>Person.model</code> and moved it to a folder called <code>workspace</code>.</p>"
+				},
+				{
+					"html": "<p>Now we can start the modelserver using the product. The server is now available at <a href='http://localhost:8081/api/v1/'>http://localhost:8081/api/v1/</a>.</p>"
+				},
+				{
+					"html": "<p>The modelserver has a default workspace set, but we want to use the folder which contains our example data.</p>"
+				},
+				{
+					"html": "<p>To set a folder as the new workspace, we need to do a <code>PUT</code> request to <code>http://localhost:8081/api/v1/server/configure</code> and provide a <code>ServerConfiguration</code> as JSON in the payload. On Linux you can use <code>curl</code> to send the request: <code>curl --request PUT --data '{\"workspaceRoot\":\"file:/home/eclipsesource/my-modeling-tool/workspace/\"}' http://localhost:8081/api/v1/server/configure</code>. When calling <a href='http://localhost:8081/api/v1/models'>http://localhost:8081/api/v1/models</a> you should see your example file uri and its serialization as JSON.</p>"
+				}
+			],
+			"solve": [
+				{
+					"terminalCommands": [
+						"cp -R .tutorial/solution/target my-modeling-tool/backend",
+						"cp -R .tutorial/solution/com.eclipsesource.example.model my-modeling-tool/backend",
+						"cp -R .tutorial/solution/com.eclipsesource.example.modelserver my-modeling-tool/backend",
+						"cp -R .tutorial/solution/workspace my-modeling-tool/workspace"
+					]
+				}
+			]
+		}
+	]
+}
